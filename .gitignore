@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/MovieRecommend
+/MovieRecommend.API/bin/Debug/net7.0
+/MovieRecommend.API/obj
+/MovieRecommend.Web/node_modules
+/MovieRecommend.Web/obj/Debug
