@@ -1,20 +1,22 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Trainers;
 using MovieRecommend.API.Data.Structures;
+using System.Text;
 
 namespace MovieRecommend.API.ML
 {
-    public class MLService
+    public class MLService : IMLService
     {
-        // Using the ml-latest-small.zip as dataset from https://grouplens.org/datasets/movielens/. 
-        private static string ModelsRelativePath = @"../Data/Structures";
-        public static string DatasetsRelativePath = @"../Data/Sets";
+        private static string ModelsRelativePath = @"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Structures";
+        public static string DatasetsRelativePath = @"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Sets";
 
         private static string TrainingDataRelativePath = $"{DatasetsRelativePath}/recommendation-ratings-train.csv";
+        private static string TrainingDataPath = $"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Sets/recommendation-ratings-train.csv";
         private static string TestDataRelativePath = $"{DatasetsRelativePath}/recommendation-ratings-test.csv";
-        private static string MoviesDataLocation = $"{DatasetsRelativePath}/movies.csv";
+        private static string TestDataPath = $"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Sets/recommendation-ratings-test.csv";
 
         private static string TrainingDataLocation = GetAbsolutePath(TrainingDataRelativePath);
+        
         private static string TestDataLocation = GetAbsolutePath(TestDataRelativePath);
 
         private static string ModelPath = GetAbsolutePath(ModelsRelativePath);
@@ -22,14 +24,17 @@ namespace MovieRecommend.API.ML
         private const float predictionuserId = 6;
         private const int predictionmovieId = 10;
 
-        static void Main(string[] args)
+        public string CalculateThings()
         {
             //STEP 1: Create MLContext to be shared across the model creation workflow objects 
             MLContext mlcontext = new MLContext();
+            StringBuilder resultString = new StringBuilder();
+
 
             //STEP 2: Read the training data which will be used to train the movie recommendation model    
             //The schema for training data is defined by type 'TInput' in LoadFromTextFile<TInput>() method.
-            IDataView trainingDataView = mlcontext.Data.LoadFromTextFile<MovieRating>(TrainingDataLocation, hasHeader: true, separatorChar: ',');
+            IDataView trainingDataView = mlcontext.Data.LoadFromTextFile<MovieRating>(TrainingDataPath, hasHeader: true, separatorChar: ',');
+
 
             //STEP 3: Transform your data by encoding the two features userId and movieID. These encoded features will be provided as input
             //        to our MatrixFactorizationTrainer.
@@ -41,22 +46,38 @@ namespace MovieRecommend.API.ML
             options.MatrixColumnIndexColumnName = "userIdEncoded";
             options.MatrixRowIndexColumnName = "movieIdEncoded";
             options.LabelColumnName = "Label";
-            options.NumberOfIterations = 20;
+            options.NumberOfIterations = 50;
             options.ApproximationRank = 100;
+
 
             //STEP 4: Create the training pipeline 
             var trainingPipeLine = dataProcessingPipeline.Append(mlcontext.Recommendation().Trainers.MatrixFactorization(options));
 
+
             //STEP 5: Train the model fitting to the DataSet
             Console.WriteLine("=============== Training the model ===============");
+            resultString.AppendLine("=============== Training the model ===============");
+            // Get the output in a variable:
+            var stringWriter = new StringWriter();
+            Console.SetOut(stringWriter);
             ITransformer model = trainingPipeLine.Fit(trainingDataView);
+            stringWriter.Flush();
+            string output = stringWriter.ToString();
+            resultString.AppendLine(output);
+            Console.SetOut(Console.Out);
+            Console.WriteLine("the output is: ......" + output);
+
 
             //STEP 6: Evaluate the model performance 
             Console.WriteLine("=============== Evaluating the model ===============");
-            IDataView testDataView = mlcontext.Data.LoadFromTextFile<MovieRating>(TestDataLocation, hasHeader: true, separatorChar: ',');
+            resultString.AppendLine("=============== Evaluating the model ===============");
+            IDataView testDataView = mlcontext.Data.LoadFromTextFile<MovieRating>(TestDataPath, hasHeader: true, separatorChar: ',');
             var prediction = model.Transform(testDataView);
             var metrics = mlcontext.Regression.Evaluate(prediction, labelColumnName: "Label", scoreColumnName: "Score");
+
             Console.WriteLine("The model evaluation metrics RootMeanSquaredError:" + metrics.RootMeanSquaredError);
+            resultString.AppendLine("The model evaluation metrics RootMeanSquaredError:" + metrics.RootMeanSquaredError);
+
 
             //STEP 7:  Try/test a single prediction by predicting a single movie rating for a specific user
             var predictionengine = mlcontext.Model.CreatePredictionEngine<MovieRating, MovieRatingPrediction>(model);
@@ -73,10 +94,14 @@ namespace MovieRecommend.API.ML
             );
 
             Movie movieService = new Movie();
-            Console.WriteLine("For userId:" + predictionuserId + " movie rating prediction (1 - 5 stars) for movie:" + movieService.Get(predictionmovieId).movieTitle + " is:" + Math.Round(movieratingprediction.Score, 1));
-
+            Console.WriteLine("For userId:" + predictionuserId + " movie rating prediction (1 - 5 stars) for movie:" 
+                + movieService.Get(predictionmovieId).movieTitle + " is:" + Math.Round(movieratingprediction.Score, 1));
             Console.WriteLine("=============== End of process, hit any key to finish ===============");
-            Console.ReadLine();
+
+            resultString.AppendLine("For userId:" + predictionuserId + " movie rating prediction (1 - 5 stars) for movie:"
+                + movieService.Get(predictionmovieId).movieTitle + " is:" + Math.Round(movieratingprediction.Score, 1));
+            resultString.AppendLine("=============== End of process, hit any key to finish ===============");
+            return resultString.ToString();
         }
 
         public static string GetAbsolutePath(string relativePath)
