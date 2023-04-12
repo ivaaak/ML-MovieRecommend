@@ -8,8 +8,8 @@ namespace MovieRecommend.API.Data.Structures
 
         public String movieTitle;
 
-        private static String moviesdatasetRelativepath = $"{MLService.DatasetsRelativePath}/recommendation-movies.csv";
-        private static string moviesdatasetpath = MLService.GetAbsolutePath(moviesdatasetRelativepath);
+        private static String moviesdatasetRelativepath = $"{GlobalConstants.DatasetsRelativePath}/recommendation-movies.csv";
+        private static string moviesdatasetpath = GlobalConstants.GetAbsolutePath(moviesdatasetRelativepath);
 
         public Lazy<List<Movie>> _movies = new Lazy<List<Movie>>(() => LoadMovieData(moviesdatasetpath));
 
