@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MovieRecommend.API.Data.Structures;
 using MovieRecommend.API.ML;
 
 namespace MovieRecommend.API.Controllers;
@@ -19,10 +20,19 @@ public class MLController : ControllerBase
         _mlService = mlService;
     }
 
-    [HttpGet(Name = "Calculate")]
+    [HttpGet("calculate")]
     public string Calculate()
     {
-        
-        return _mlService.CalculateThings();
+        return _mlService.RunModel();
+    }
+
+    [HttpGet("parametrized")]
+    public APIResultDTO Parametrized(float movieID, float userID)
+    {
+        var result = new APIResultDTO();
+
+        var data = _mlService.RunModelWithParams(movieID, userID);
+
+        return result;
     }
 }

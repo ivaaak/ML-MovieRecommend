@@ -1,10 +1,11 @@
 ﻿using Microsoft.ML;
+using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
-using MovieRecommend.API.Data.Structures;
-using System.Text;
+using Microsoft.ML.Transforms;
 using MovieRecommend.API.Data;
-using static Microsoft.ML.Data.DataDebuggerPreview;
-using System.Diagnostics;
+using MovieRecommend.API.Data.Structures;
+using System.Reflection;
+using System.Text;
 
 namespace MovieRecommend.API.ML
 {
@@ -12,74 +13,155 @@ namespace MovieRecommend.API.ML
     {
         private readonly MLContext mlcontext;
 
+        private EstimatorChain<ValueToKeyMappingTransformer> dataProcessingPipelineResult;
+        private EstimatorChain<Microsoft.ML.Trainers.Recommender.MatrixFactorizationPredictionTransformer> trainingPipeLine;
+
+        private IDataView? trainingDataView { get; set; }
+        private StringBuilder resultString { get; set; }
+
         public MLService()
         {
             mlcontext = new MLContext();
+
+            this.resultString = new StringBuilder();
         }
-        public string CalculateThings()
+
+        public string RunModel()
         {
-            //STEP 1: Create MLContext to be shared across the model creation workflow objects 
-            StringBuilder resultString = new StringBuilder();
 
+            this.trainingDataView = LoadDataFromDb();
 
+            this.dataProcessingPipelineResult = TransformData();
+
+            var model = TrainAndReturnModel();
+
+            var evaluationResultString = EvaluateModelPerformance(model);
+
+            GetMovieRatingPrediction(model, 1, 1);
+
+            return resultString.ToString();
+        }
+
+        public APIResultDTO RunModelWithParams(float movieID, float userID)
+        {
+            var resultObject = new APIResultDTO();
+
+            this.trainingDataView = LoadDataFromDb();
+            this.dataProcessingPipelineResult = TransformData();
+            var model = TrainAndReturnModel();
+            var evaluationResultString = EvaluateModelPerformance(model);
+            GetMovieRatingPrediction(model, movieID, userID);
+            // make this return a DTO
+
+            resultObject.evaluationMetricsError = evaluationResultString;
+            resultObject.predictedRatingResult = 
+            resultObject.movieTitleInputted =
+            resultObject.userID = 
+
+            return resultString.ToString();
+        }
+
+        public IDataView LoadDataFromDb()
+        {
             //STEP 2: Read the training data which will be used to train the movie recommendation model    
             //The schema for training data is defined by type 'TInput' in LoadFromTextFile<TInput>() method.
-            IDataView trainingDataView = mlcontext.Data.LoadFromTextFile<MovieRating>(GlobalConstants.TrainingDataPath, hasHeader: true, separatorChar: ',');
 
+            var trainingDataView = mlcontext.Data
+                .LoadFromTextFile<MovieRating>(
+                    GlobalConstants.TrainingDataPath,
+                    hasHeader: true,
+                    separatorChar: ',');
 
-            //STEP 3: Transform your data by encoding the two features userId and movieID. These encoded features will be provided as input
-            //        to our MatrixFactorizationTrainer.
+            return trainingDataView;
+        }
+
+        public EstimatorChain<ValueToKeyMappingTransformer> TransformData()
+        {
+            //STEP 3: Transform your data by encoding the two features userId and movieID.
+            // These encoded features will be provided as input to our MatrixFactorizationTrainer.
             var dataProcessingPipeline = mlcontext
                 .Transforms.Conversion
                 .MapValueToKey(
-                    outputColumnName: "userIdEncoded", 
+                    outputColumnName: "userIdEncoded",
                     inputColumnName: nameof(MovieRating.userId))
                 .Append(mlcontext.Transforms.Conversion
                     .MapValueToKey(
-                    outputColumnName: "movieIdEncoded", 
-                    inputColumnName: nameof(MovieRating.movieId)));
+                    outputColumnName: "movieIdEncoded",
+                    inputColumnName: nameof(MovieRating.movieId))
+                 );
 
+            return dataProcessingPipeline;
+        }
+
+        public MatrixFactorizationTrainer.Options GenerateOptionsObject()
+        {
             //Specify the options for MatrixFactorization trainer            
-            MatrixFactorizationTrainer.Options options = new MatrixFactorizationTrainer.Options();
-            options.MatrixColumnIndexColumnName = "userIdEncoded";
-            options.MatrixRowIndexColumnName = "movieIdEncoded";
-            options.LabelColumnName = "Label";
-            options.NumberOfIterations = 50;
-            options.ApproximationRank = 100;
+            MatrixFactorizationTrainer.Options options = new MatrixFactorizationTrainer.Options
+            {
+                MatrixColumnIndexColumnName = "userIdEncoded",
+                MatrixRowIndexColumnName = "movieIdEncoded",
+                LabelColumnName = "Label",
+                NumberOfIterations = 50,
+                ApproximationRank = 100
+            };
 
+            return options;
+        }
+
+        public void GeneratePipeline() // currently unused
+        {
+            //STEP 4: Create the training pipeline 
+            //var trainingPipeLine = dataProcessingPipelineResult
+               // .Append(mlcontext.Recommendation().Trainers.MatrixFactorization(options));
+
+        }
+
+        public ITransformer TrainAndReturnModel()
+        {
+            var options = GenerateOptionsObject(); // ADD VARIABLES?
 
             //STEP 4: Create the training pipeline 
-            var trainingPipeLine = dataProcessingPipeline.Append(mlcontext.Recommendation().Trainers.MatrixFactorization(options));
+            this.trainingPipeLine = dataProcessingPipelineResult
+                .Append(mlcontext.Recommendation().Trainers.MatrixFactorization(options));
 
 
             //STEP 5: Train the model fitting to the DataSet
             Console.WriteLine("=============== Training the model ===============");
-            resultString.AppendLine("=============== Training the model ===============");
+            this.resultString.AppendLine("=============== Training the model ===============");
 
             // HERE ITERATIONS GET PRINTED OUT
             ITransformer model = trainingPipeLine.Fit(trainingDataView);
 
+            return model;
+        }
 
+        public string EvaluateModelPerformance(ITransformer model)
+        {
             //STEP 6: Evaluate the model performance 
-            Console.WriteLine("=============== Evaluating the model ===============");
-            resultString.AppendLine("=============== Evaluating the model ===============");
+            string evaluateTemplateLine = "=============== Evaluating the model ===============";
+            Console.WriteLine(evaluateTemplateLine);
+            resultString.AppendLine(evaluateTemplateLine);
 
 
             IDataView testDataView = mlcontext.Data.LoadFromTextFile<MovieRating>(GlobalConstants.TestDataPath, hasHeader: true, separatorChar: ',');
             var prediction = model.Transform(testDataView);
             var metrics = mlcontext.Regression.Evaluate(prediction, labelColumnName: "Label", scoreColumnName: "Score");
 
-            Console.WriteLine("The model evaluation metrics RootMeanSquaredError:" + metrics.RootMeanSquaredError);
-            resultString.AppendLine("The model evaluation metrics RootMeanSquaredError:" + metrics.RootMeanSquaredError);
+            var evalResultString = ("The model evaluation metrics RootMeanSquaredError:" + metrics.RootMeanSquaredError);
+            Console.WriteLine(evalResultString);
+            resultString.AppendLine(evalResultString);
 
+            return resultString.ToString();
+        }
 
-
+        public APIResultDTO GetMovieRatingPrediction(ITransformer model, float movieID, float userID)
+        {
             //STEP 7:  Try/test a single prediction by predicting a single movie rating for a specific user
-            var predictionengine = mlcontext.Model.CreatePredictionEngine<MovieRating, MovieRatingPrediction>(model);
+            var PredictionEngine = mlcontext.Model.CreatePredictionEngine<MovieRating, MovieRatingPrediction>(model);
             /* Make a single movie rating prediction, the scores are for a particular user and will range from 1 - 5. 
                The higher the score the higher the likelyhood of a user liking a particular movie.
                You can recommend a movie to a user if say rating > 3.5.*/
-            var movieratingprediction = predictionengine.Predict(
+            var movieRatingPrediction = PredictionEngine.Predict(
                 new MovieRating()
                 {   //Example rating prediction for userId = 6, movieId = 10 (GoldenEye)
                     userId = GlobalConstants.predictionuserId,
@@ -87,20 +169,28 @@ namespace MovieRecommend.API.ML
                 }
             );
 
+            var parametrizedMovieRatingPrediction = PredictionEngine.Predict(
+                new MovieRating()
+                {   // prediction based off the params
+                    userId = userID,
+                    movieId = movieID
+                }
+            );
+
             Movie movieService = new Movie();
-            Console.WriteLine("For userId:" + GlobalConstants.predictionuserId 
-                + " movie rating prediction (1 - 5 stars) for movie:" 
-                + movieService.Get(GlobalConstants.predictionmovieId).movieTitle 
-                + " is:" + Math.Round(movieratingprediction.Score, 1));
-            Console.WriteLine("=============== End of process ===============");
-            resultString.AppendLine(
-                "For userId:" + GlobalConstants.predictionuserId 
-                + " movie rating prediction (1 - 5 stars) for movie:"
-                + movieService.Get(GlobalConstants.predictionmovieId).movieTitle 
-                + " is:" + Math.Round(movieratingprediction.Score, 1));
+            string resultStringTemplate = (
+                "For userId: " + GlobalConstants.predictionuserId
+                + Environment.NewLine 
+                + "Movie rating prediction (1 - 5 stars) for movie: "
+                + Environment.NewLine
+                + movieService.Get(GlobalConstants.predictionmovieId).movieTitle
+                + " : " + Math.Round(movieRatingPrediction.Score, 1));
 
-
+            Console.WriteLine(resultStringTemplate);
+            resultString.AppendLine(resultStringTemplate);
             resultString.AppendLine("=============== End of process ===============");
+
+
             return resultString.ToString();
         }
     }
