@@ -33,6 +33,6 @@ public class MLController : ControllerBase
 
         var data = _mlService.RunModelWithParams(movieID, userID);
 
-        return result;
+        return data;
     }
 }

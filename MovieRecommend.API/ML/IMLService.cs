@@ -6,7 +6,7 @@ namespace MovieRecommend.API.ML
     {
         public string RunModel();
 
-        public APIResultDTO RunModelWithParams(float userID, float movieID)
+        public APIResultDTO RunModelWithParams(float userID, float movieID);
 
         //public string GetAbsolutePath(string relativePath);
     }

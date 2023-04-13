@@ -50,15 +50,11 @@ namespace MovieRecommend.API.ML
             this.dataProcessingPipelineResult = TransformData();
             var model = TrainAndReturnModel();
             var evaluationResultString = EvaluateModelPerformance(model);
-            GetMovieRatingPrediction(model, movieID, userID);
+
+            resultObject = GetMovieRatingPrediction(model, movieID, userID);
             // make this return a DTO
 
-            resultObject.evaluationMetricsError = evaluationResultString;
-            resultObject.predictedRatingResult = 
-            resultObject.movieTitleInputted =
-            resultObject.userID = 
-
-            return resultString.ToString();
+            return resultObject;
         }
 
         public IDataView LoadDataFromDb()
@@ -156,18 +152,19 @@ namespace MovieRecommend.API.ML
 
         public APIResultDTO GetMovieRatingPrediction(ITransformer model, float movieID, float userID)
         {
+            var result = new APIResultDTO();
             //STEP 7:  Try/test a single prediction by predicting a single movie rating for a specific user
             var PredictionEngine = mlcontext.Model.CreatePredictionEngine<MovieRating, MovieRatingPrediction>(model);
             /* Make a single movie rating prediction, the scores are for a particular user and will range from 1 - 5. 
                The higher the score the higher the likelyhood of a user liking a particular movie.
-               You can recommend a movie to a user if say rating > 3.5.*/
+               You can recommend a movie to a user if say rating > 3.5.
             var movieRatingPrediction = PredictionEngine.Predict(
                 new MovieRating()
                 {   //Example rating prediction for userId = 6, movieId = 10 (GoldenEye)
                     userId = GlobalConstants.predictionuserId,
                     movieId = GlobalConstants.predictionmovieId
                 }
-            );
+            );*/
 
             var parametrizedMovieRatingPrediction = PredictionEngine.Predict(
                 new MovieRating()
@@ -178,20 +175,27 @@ namespace MovieRecommend.API.ML
             );
 
             Movie movieService = new Movie();
+            var movieTitleResult = movieService.Get((int)movieID).movieTitle;
+
             string resultStringTemplate = (
                 "For userId: " + GlobalConstants.predictionuserId
                 + Environment.NewLine 
                 + "Movie rating prediction (1 - 5 stars) for movie: "
                 + Environment.NewLine
-                + movieService.Get(GlobalConstants.predictionmovieId).movieTitle
-                + " : " + Math.Round(movieRatingPrediction.Score, 1));
+                + movieTitleResult
+                + " : " + Math.Round(parametrizedMovieRatingPrediction.Score, 1));
 
             Console.WriteLine(resultStringTemplate);
             resultString.AppendLine(resultStringTemplate);
             resultString.AppendLine("=============== End of process ===============");
 
+            result.movieTitleInputted = movieTitleResult;
+            result.predictedRatingResult = Math.Round(parametrizedMovieRatingPrediction.Score, 1).ToString();
+            result.userID = userID.ToString();
+            result.evaluationMetricsError = parametrizedMovieRatingPrediction.ToString();
 
-            return resultString.ToString();
+            //return resultString.ToString();
+            return result;
         }
     }
 }
