@@ -13,15 +13,13 @@ export default class App extends Component {
         { code: 'P005', name: 'Product 5', category: 'Category B', quantity: 3 },
     ];
       
-    mlDataObject = {};
-
     constructor(props) {
         super(props);
-        this.state = { forecasts: [], loading: true };
+        this.state = { mlDataObject: {}, loading: true };
     }
 
     componentDidMount() {
-        this.populateWeatherData();
+        this.unusedPopulateWeatherData();
     }
 
     static renderForecastsTable(forecasts) {
@@ -49,19 +47,13 @@ export default class App extends Component {
         );
     }
 
-    async startMLAlgorythm() {
-        await fetch('https://localhost:7033/ML')
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                this.mlDataObject = data;
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    };
+    async startML() {
+        const response = await fetch('ML');
+        const data = await response.json();
+        this.setState({ mlDataObject: data, loading: false });
+    }
 
-    async populateWeatherData() {
+    async unusedPopulateWeatherData() {
         const response = await fetch('weatherforecast');
         const data = await response.json();
         this.setState({ forecasts: data, loading: false });
@@ -70,10 +62,8 @@ export default class App extends Component {
 
     render() {
         let contents = this.state.loading
-            ? <p><em>Loading... Please refresh once the .NET backend has started. See 
-                <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact
-                </a> for more details.</em></p>
-            : App.renderForecastsTable(this.state.forecasts);
+            ? <p> Loading... Please refresh once the .NET backend has started. </p>
+            : App.renderForecastsTable(this.state.mlDataObject);
 
         return (
             <div>
@@ -82,7 +72,9 @@ export default class App extends Component {
                 {contents}
 
                 <br /> <br /> <br />
-                <button onClick={this.fetchData}>Fetch Data</button>
+                <button onClick={this.startML}>Start ML Algo</button>
+                <button onClick={this.startML}>Run Recommend</button>
+
 
                 <DataTable value={this.products} tableStyle={{ minWidth: '50rem' }}>
                     <Column field="code" header="Code"></Column>
