@@ -18,10 +18,6 @@ export default class App extends Component {
         this.state = { mlDataObject: {}, loading: true };
     }
 
-    componentDidMount() {
-        this.unusedPopulateWeatherData();
-    }
-
     static renderForecastsTable(forecasts) {
         return (
             <table className='table table-striped' aria-labelledby="tabelLabel">
@@ -48,28 +44,30 @@ export default class App extends Component {
     }
 
     async startML() {
-        const response = await fetch('ML');
+        const response = fetch('https://localhost:7033/ML/calculate', {    
+            method: 'GET',    
+            withCredentials: true,    
+            crossorigin: true,    
+            mode: 'no-cors',       
+          })    
+            .then((res) => res.json())    
+            .then((data) => {    
+              console.log(data);    
+            })    
+            .catch((error) => {    
+              console.error(error);    
+            });    
+        console.log("response", response)
         const data = await response.json();
         this.setState({ mlDataObject: data, loading: false });
-    }
-
-    async unusedPopulateWeatherData() {
-        const response = await fetch('weatherforecast');
-        const data = await response.json();
-        this.setState({ forecasts: data, loading: false });
-    }
-
+    };
 
     render() {
-        let contents = this.state.loading
-            ? <p> Loading... Please refresh once the .NET backend has started. </p>
-            : App.renderForecastsTable(this.state.mlDataObject);
-
         return (
             <div>
                 <h1 id="tabelLabel" > ML Algorythms </h1>
                 <p>This component demonstrates fetching data from the server.</p>
-                {contents}
+                {}
 
                 <br /> <br /> <br />
                 <button onClick={this.startML}>Start ML Algo</button>

@@ -7,22 +7,24 @@ builder.Services.AddEndpointsApiExplorer().AddSwaggerGen();
 
 builder.Services.AddScoped<IMLService, MLService>();
 
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-          builder => builder.AllowAnyOrigin()
-                            .AllowAnyMethod()
-                            .AllowAnyHeader());
+    options.AddPolicy("Policy",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger().UseSwaggerUI();
-}
 
+app.UseSwagger().UseSwaggerUI();
 app.UseHttpsRedirection().UseAuthorization();
 app.MapControllers();
+app.UseCors();
 
 app.Run();
