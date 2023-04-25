@@ -8,16 +8,24 @@ namespace MovieRecommend.API.Data.Structures
 
         public String movieTitle;
 
-        private static String moviesdatasetRelativepath = $"{GlobalConstants.DatasetsRelativePath}/recommendation-movies.csv";
-        private static string moviesdatasetpath = GlobalConstants.GetAbsolutePath(moviesdatasetRelativepath);
-
-        public Lazy<List<Movie>> _movies = new Lazy<List<Movie>>(() => LoadMovieData(moviesdatasetpath));
+        public Lazy<List<Movie>> _movies = new Lazy<List<Movie>>(() => LoadMovieData(GlobalConstants.MoviesRelativePath));
 
         public Movie() { }
 
         public Movie Get(int id)
         {
-            return _movies.Value.Single(m => m.movieId == id);
+            Movie result;
+            try
+            {
+                 result = _movies.Value.Single(m => m.movieId == id);
+            } 
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new Exception($"No movie with the Id {movieId} was found");
+            }
+
+            return result;
         }
 
         private static List<Movie> LoadMovieData(String moviesdatasetpath)

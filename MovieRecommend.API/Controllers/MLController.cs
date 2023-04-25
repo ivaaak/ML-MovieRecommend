@@ -8,12 +8,12 @@ namespace MovieRecommend.API.Controllers;
 [Route("[controller]")]
 public class MLController : ControllerBase
 {
-    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ILogger<MLController> _logger;
 
     private readonly IMLService _mlService;
 
     public MLController(
-        ILogger<WeatherForecastController> logger,
+        ILogger<MLController> logger,
         IMLService mlService)
     {
         _logger = logger;
@@ -21,7 +21,7 @@ public class MLController : ControllerBase
     }
 
     [HttpGet("calculate")]
-    public string Calculate()
+    public APIResultDTO Calculate()
     {
         return _mlService.RunModel();
     }

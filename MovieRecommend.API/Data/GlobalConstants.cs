@@ -1,22 +1,20 @@
-﻿namespace MovieRecommend.API.Data
+﻿#nullable disable
+using System.Diagnostics;
+
+namespace MovieRecommend.API.Data
 {
     public static class GlobalConstants
     {
-        public static string ModelsRelativePath = @"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Structures";
-        public static string DatasetsRelativePath = @"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Sets";
+        public static string TestData = Path.GetDirectoryName(
+            Process.GetCurrentProcess().MainModule.FileName) + @"\Data\Sets\recommendation-ratings-test.csv";
+        public static string TrainingData = Path.GetDirectoryName(
+            Process.GetCurrentProcess().MainModule.FileName) + @"\Data\Sets\recommendation-ratings-train.csv";
 
-        public static string TrainingDataRelativePath = $"{DatasetsRelativePath}/recommendation-ratings-train.csv";
-        public static string TrainingDataPath = $"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Sets/recommendation-ratings-train.csv";
+        public static string MoviesRelativePath = Path.GetDirectoryName(
+            Process.GetCurrentProcess().MainModule.FileName) + @"\Data\Sets\recommendation-movies.csv";
+        public static string DataStructuresRelativePath = Path.GetDirectoryName(
+            Process.GetCurrentProcess().MainModule.FileName) + @"\Data\Structures\";
 
-        public static string TestDataRelativePath = $"{DatasetsRelativePath}/recommendation-ratings-test.csv";
-        public static string TestDataPath = $"C:/.NET/ML-MovieRecommend/MovieRecommend.API/Data/Sets/recommendation-ratings-test.csv";
-
-
-        public static string TrainingDataLocation = GetAbsolutePath(TrainingDataRelativePath);
-
-        public static string TestDataLocation = GetAbsolutePath(TestDataRelativePath);
-
-        public static string ModelPath = GetAbsolutePath(ModelsRelativePath);
 
         // predictor variables
         public const float predictionuserId = 6;
@@ -26,10 +24,15 @@
 
         public static string GetAbsolutePath(string relativePath)
         {
+
             FileInfo _dataRoot = new FileInfo(typeof(Program).Assembly.Location);
             string assemblyFolderPath = _dataRoot.Directory.FullName;
 
             string fullPath = Path.Combine(assemblyFolderPath, relativePath);
+
+            Console.WriteLine($"assemblyFolderPath {assemblyFolderPath}");
+            Console.WriteLine($"_dataRoot {_dataRoot}");
+            Console.WriteLine($"fullPath {fullPath}");
 
             return fullPath;
         }

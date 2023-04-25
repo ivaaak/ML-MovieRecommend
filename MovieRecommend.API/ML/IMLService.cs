@@ -4,7 +4,7 @@ namespace MovieRecommend.API.ML
 {
     public interface IMLService
     {
-        public string RunModel();
+        public APIResultDTO RunModel();
 
         public APIResultDTO RunModelWithParams(float userID, float movieID);
 

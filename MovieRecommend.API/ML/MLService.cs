@@ -26,20 +26,19 @@ namespace MovieRecommend.API.ML
             this.resultString = new StringBuilder();
         }
 
-        public string RunModel()
+        public APIResultDTO RunModel()
         {
+            var resultObject = new APIResultDTO();
 
             this.trainingDataView = LoadDataFromDb();
-
             this.dataProcessingPipelineResult = TransformData();
 
             var model = TrainAndReturnModel();
-
             var evaluationResultString = EvaluateModelPerformance(model);
 
-            GetMovieRatingPrediction(model, 1, 1);
+            resultObject = GetMovieRatingPrediction(model, 1, 1);
 
-            return resultString.ToString();
+            return resultObject;
         }
 
         public APIResultDTO RunModelWithParams(float movieID, float userID)
@@ -48,6 +47,7 @@ namespace MovieRecommend.API.ML
 
             this.trainingDataView = LoadDataFromDb();
             this.dataProcessingPipelineResult = TransformData();
+
             var model = TrainAndReturnModel();
             var evaluationResultString = EvaluateModelPerformance(model);
 
@@ -64,7 +64,7 @@ namespace MovieRecommend.API.ML
 
             var trainingDataView = mlcontext.Data
                 .LoadFromTextFile<MovieRating>(
-                    GlobalConstants.TrainingDataPath,
+                    GlobalConstants.TrainingData,
                     hasHeader: true,
                     separatorChar: ',');
 
@@ -139,7 +139,11 @@ namespace MovieRecommend.API.ML
             resultString.AppendLine(evaluateTemplateLine);
 
 
-            IDataView testDataView = mlcontext.Data.LoadFromTextFile<MovieRating>(GlobalConstants.TestDataPath, hasHeader: true, separatorChar: ',');
+            IDataView testDataView = mlcontext.Data
+                .LoadFromTextFile<MovieRating>(
+                    GlobalConstants.TestData, 
+                    hasHeader: true, 
+                    separatorChar: ',');
             var prediction = model.Transform(testDataView);
             var metrics = mlcontext.Regression.Evaluate(prediction, labelColumnName: "Label", scoreColumnName: "Score");
 

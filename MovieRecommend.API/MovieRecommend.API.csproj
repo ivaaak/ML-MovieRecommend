@@ -17,4 +17,16 @@
     <Folder Include="Data\Sets\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\Sets\recommendation-movies.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Sets\recommendation-ratings-test.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Sets\recommendation-ratings-train.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
