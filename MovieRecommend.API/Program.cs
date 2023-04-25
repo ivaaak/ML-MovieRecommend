@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Policy",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
+            policy.WithOrigins("http://localhost:3000", "https://localhost:7033")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -21,6 +21,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("Access-Control-Allow-Origin", "https://localhost:3000");
+    context.Response.Headers.Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    await next.Invoke();
+});
 
 app.UseSwagger().UseSwaggerUI();
 app.UseHttpsRedirection().UseAuthorization();
