@@ -4,7 +4,7 @@ import "./Loader.css";
 export default function Loader() {
   return (
     <>
-      <div class="loader loader3">
+      <div className="loader loader3">
         <div>
           <div>
             <div>
