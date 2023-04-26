@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
+import Loader from "./Loader/Loader";
+import Result from "./Result/Result";
 
 export default function App() {
   const [mlDataObject, setMlDataObject] = useState(null);
@@ -26,11 +28,14 @@ export default function App() {
     }
   }
 
+  function trainTheMLModel() {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 5000);
+  }
+
   if (loading) {
     return (
-      <div id="status" className="loading">
-        Loading model (9743 Movies)...
-      </div>
+      <Loader />
     );
   }
 
@@ -71,7 +76,7 @@ export default function App() {
 
         <div className="bottom" id="controls" disabled>
           <div style={{ textAlign: "center" }}>
-            <button onClick={startML}>Train the ML model</button>
+            <button onClick={trainTheMLModel}>Train the ML model</button>
             <button onClick={startML}>Run Recommend Engine</button>
           </div>
           <div className="horizontal">
@@ -98,6 +103,8 @@ export default function App() {
       <div>
         {mlDataObject && <pre>{JSON.stringify(mlDataObject, null, 2)}</pre>}
       </div>
+
+      <Result value={mlDataObject}/>
     </>
   );
 }
