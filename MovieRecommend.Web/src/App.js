@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
 import Loader from "./Loader/Loader";
+import Result from "./Result/Result";
 
 export default function App() {
   const [mlDataObject, setMlDataObject] = useState(null);
@@ -101,11 +102,7 @@ export default function App() {
         titles and genres. <br />
         May work poorly on mobile.
       </p>
-
-      <div>
-        {mlDataObject && <pre>{JSON.stringify(mlDataObject, null, 2)}</pre>}
-      </div>
-
+      { mlDataObject && <Result value={mlDataObject}/>}
     </>
   );
 }

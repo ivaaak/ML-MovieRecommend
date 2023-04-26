@@ -18,6 +18,7 @@ namespace MovieRecommend.API.ML
 
         private IDataView? trainingDataView { get; set; }
         private StringBuilder resultString { get; set; }
+        private string evaluationMetricsError { get; set; }
 
         public MLService()
         {
@@ -52,6 +53,8 @@ namespace MovieRecommend.API.ML
             var evaluationResultString = EvaluateModelPerformance(model);
 
             resultObject = GetMovieRatingPrediction(model, movieID, userID);
+            resultObject.evaluationMetricsError = this.evaluationMetricsError;
+            Console.WriteLine($"resultObject.evaluationMetricsError {resultObject.evaluationMetricsError}");
             // make this return a DTO
 
             return resultObject;
@@ -148,6 +151,8 @@ namespace MovieRecommend.API.ML
             var metrics = mlcontext.Regression.Evaluate(prediction, labelColumnName: "Label", scoreColumnName: "Score");
 
             var evalResultString = ("The model evaluation metrics RootMeanSquaredError:" + metrics.RootMeanSquaredError);
+            this.evaluationMetricsError = metrics.RootMeanSquaredError.ToString();
+
             Console.WriteLine(evalResultString);
             resultString.AppendLine(evalResultString);
 
