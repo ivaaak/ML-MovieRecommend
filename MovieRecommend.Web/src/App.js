@@ -49,10 +49,6 @@ export default function App() {
     return <Loader />;
   }
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
   return (
     <>
       <div className="content">
@@ -112,6 +108,7 @@ export default function App() {
         May work poorly on mobile.
       </p>
       {mlDataObject && <Result value={mlDataObject} />}
+      {error && <div>Error: {error.message}</div>}
     </>
   );
 }
