@@ -4,26 +4,35 @@ import Loader from "./Loader/Loader";
 import Result from "./Result/Result";
 
 export default function App() {
-  const [mlDataObject, setMlDataObject] = useState(null);
+  const [mlDataObject, setMlDataObject] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState("");
   const [movieId, setMovieId] = useState("");
 
+  function createArray(valuesObject) {
+    let mlObject = {
+      evaluationMetricsError: valuesObject.evaluationMetricsError,
+      movieTitleInputted: valuesObject.movieTitleInputted,
+      predictedRatingResult: valuesObject.predictedRatingResult,
+      userID: valuesObject.userID
+    };
+    setMlDataObject([...mlDataObject, mlObject])
+  }
+
   async function startML(selectedMovieId, selectedUserId) {
     setLoading(true);
-    console.log(`https://localhost:7033/ML/parametrized?movieID=${selectedMovieId}&userID=${selectedUserId}`);
     try {
       const response = await fetch(
-        `https://localhost:7033/ML/parametrized?movieID=${selectedMovieId}&userID=${selectedUserId}`, 
+        `https://localhost:7033/ML/parametrized?movieID=${selectedMovieId}&userID=${selectedUserId}`,
         {
           method: "GET",
           withCredentials: true,
           crossorigin: true
-        });
+        }
+      );
       const data = await response.json();
-      console.log(data);
-      setMlDataObject(data);
+      createArray(data);
     } catch (error) {
       setError(error);
     } finally {
@@ -37,9 +46,7 @@ export default function App() {
   }
 
   if (loading) {
-    return (
-      <Loader />
-    );
+    return <Loader />;
   }
 
   if (error) {
@@ -61,14 +68,14 @@ export default function App() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="userId">userId: {userId.value}</label>
+          <label htmlFor="userId">userId: </label>
           <input
             id="userId"
             className="form-control"
             type="number"
             onChange={e => setUserId({ value: e.target.value })}
           />
-          <label htmlFor="movieId">movieId: {movieId.value}</label>
+          <label htmlFor="movieId">movieId: </label>
           <input
             id="movieId"
             className="form-control"
@@ -80,7 +87,9 @@ export default function App() {
         <div className="bottom" id="controls" disabled>
           <div style={{ textAlign: "center" }}>
             <button onClick={trainTheMLModel}>Train the ML model</button>
-            <button onClick={() => startML(movieId.value, userId.value)}>Run Recommend Engine</button>
+            <button onClick={() => startML(movieId.value, userId.value)}>
+              Run Recommend Engine
+            </button>
           </div>
           <div className="horizontal">
             <div id="style1">
@@ -102,7 +111,7 @@ export default function App() {
         titles and genres. <br />
         May work poorly on mobile.
       </p>
-      { mlDataObject && <Result value={mlDataObject}/>}
+      {mlDataObject && <Result value={mlDataObject} />}
     </>
   );
 }
