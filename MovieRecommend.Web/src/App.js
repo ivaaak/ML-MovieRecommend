@@ -15,7 +15,7 @@ export default function App() {
     console.log(`https://localhost:7033/ML/parametrized?movieID=${selectedMovieId}&userID=${selectedUserId}`);
     try {
       const response = await fetch(
-        `https://localhost:7033/ML/parametrized?movieID=${selectedMovieId}&userID=${selectedUserId}`, 
+        `https://localhost:7033/ML/parametrized?movieID=${selectedMovieId}&userID=${selectedUserId}`,
         {
           method: "GET",
           withCredentials: true,
@@ -61,20 +61,22 @@ export default function App() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="userId">userId: {userId.value}</label>
-          <input
-            id="userId"
-            className="form-control"
-            type="number"
-            onChange={e => setUserId({ value: e.target.value })}
-          />
-          <label htmlFor="movieId">movieId: {movieId.value}</label>
-          <input
-            id="movieId"
-            className="form-control"
-            type="number"
-            onChange={e => setMovieId({ value: e.target.value })}
-          />
+          <label htmlFor="userId">User ID
+            <input
+              id="userId"
+              className="form-control"
+              type="number"
+              onChange={e => setUserId({ value: e.target.value })}
+            />
+          </label>
+          <label htmlFor="movieId">Movie ID
+            <input
+              id="movieId"
+              className="form-control"
+              type="number"
+              onChange={e => setMovieId({ value: e.target.value })}
+            />
+          </label>
         </div>
 
         <div className="bottom" id="controls" disabled>
@@ -94,15 +96,24 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        <div className="resultTable">
+          {mlDataObject && <Result value={mlDataObject} />}
+        </div>
       </div>
-      <p className="fineprint">
-        Made with .NET, React, ML.NET, PostgreSQL <br />
-        Designed by ____ <br />
-        Using the MovieLens dataset which comes <br /> with movie ratings,
-        titles and genres. <br />
-        May work poorly on mobile.
-      </p>
-      { mlDataObject && <Result value={mlDataObject}/>}
+
+      <span class="tooltip">
+        <button className="tooltipBtn">?</button>
+        <span class="tooltiptext">
+          <p className="fineprint">
+            Made with .NET, React, ML.NET, PostgreSQL <br />
+            Designed by ____ <br />
+            Using the MovieLens dataset which comes <br /> with movie ratings,
+            titles and genres. <br />
+            May work poorly on mobile.
+          </p>
+        </span>
+      </span>
     </>
   );
 }
