@@ -111,9 +111,9 @@ export default function App() {
         </div>
       </div>
       
-      <span class="tooltip">
+      <span className="tooltip">
         <button className="tooltipBtn">?</button>
-        <span class="tooltiptext">
+        <span className="tooltiptext">
           <p className="fineprint">
             Made with .NET, React, ML.NET, PostgreSQL <br />
             Designed by ____ <br />
