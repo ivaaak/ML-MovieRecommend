@@ -8,3 +8,4 @@
 /MovieRecommend.Web/node_modules
 /MovieRecommend.Web/obj/Debug
 /.vs/ProjectEvaluation
+/.cert/
