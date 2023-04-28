@@ -8,3 +8,6 @@
 /MovieRecommend.Web/node_modules
 /MovieRecommend.Web/obj/Debug
 /.vs/ProjectEvaluation
+/.cert/
+MovieRecommend.Web/.cert/reactapp.pem
+MovieRecommend.Web/.cert/reactapp.key

@@ -64,20 +64,22 @@ export default function App() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="userId">userId: </label>
-          <input
-            id="userId"
-            className="form-control"
-            type="number"
-            onChange={e => setUserId({ value: e.target.value })}
-          />
-          <label htmlFor="movieId">movieId: </label>
-          <input
-            id="movieId"
-            className="form-control"
-            type="number"
-            onChange={e => setMovieId({ value: e.target.value })}
-          />
+          <label htmlFor="userId">User ID
+            <input
+              id="userId"
+              className="form-control"
+              type="number"
+              onChange={e => setUserId({ value: e.target.value })}
+            />
+          </label>
+          <label htmlFor="movieId">Movie ID
+            <input
+              id="movieId"
+              className="form-control"
+              type="number"
+              onChange={e => setMovieId({ value: e.target.value })}
+            />
+          </label>
         </div>
 
         <div className="bottom" id="controls" disabled>
@@ -99,16 +101,24 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        <div className="resultTable">
+          {mlDataObject && <Result value={mlDataObject} />}
+        </div>
       </div>
-      <p className="fineprint">
-        Made with .NET, React, ML.NET, PostgreSQL <br />
-        Designed by ____ <br />
-        Using the MovieLens dataset which comes <br /> with movie ratings,
-        titles and genres. <br />
-        May work poorly on mobile.
-      </p>
-      {mlDataObject && <Result value={mlDataObject} />}
-      {error && <div>Error: {error.message}</div>}
+      
+      <span className="tooltip">
+        <button className="tooltipBtn">?</button>
+        <span className="tooltiptext">
+          <p className="fineprint">
+            Made with .NET, React, ML.NET, PostgreSQL <br />
+            Designed by ____ <br />
+            Using the MovieLens dataset which comes <br /> with movie ratings,
+            titles and genres. <br />
+            May work poorly on mobile.
+          </p>
+        </span>
+      </span>
     </>
   );
 }
