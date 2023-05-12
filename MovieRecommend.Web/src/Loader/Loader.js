@@ -35,7 +35,9 @@ export default function Loader() {
       </div>
       
       <div id="status" className="loading">
-        Loading model (9743 Movies)...
+        Loading training model (193609 Ratings)...
+        <br/>
+        Loading full model (9743 Movies)...
       </div>
     </>
   );

@@ -42,7 +42,7 @@ export default function App() {
 
   function trainTheMLModel() {
     setLoading(true);
-    setTimeout(() => setLoading(false), 5000);
+    setTimeout(() => setLoading(false), 3000);
   }
 
   if (loading) {
@@ -93,17 +93,7 @@ export default function App() {
               Run Recommend Engine
             </button>
           </div>
-          <div className="horizontal">
-            <div id="style1">
-              <h2>Style 1</h2>
-              <button id="sample1">Random</button>
-            </div>
-            <input id="alpha" type="range" min="0" max="5" defaultValue="2" />
-            <div id="style2">
-              <h2>Style 2</h2>
-              <button id="sample2">Random</button>
-            </div>
-          </div>
+
         </div>
 
         <div className="resultTable">
@@ -116,7 +106,7 @@ export default function App() {
         <span className="tooltiptext">
           <p className="fineprint">
             Made with .NET, React, ML.NET, PostgreSQL <br />
-            Designed by ____ <br />
+            Designed by Ivaylo Pavlov <br />
             Using the MovieLens dataset which comes <br /> with movie ratings,
             titles and genres. <br />
             May work poorly on mobile.

@@ -107,7 +107,7 @@ namespace MovieRecommend.API.ML
             return options;
         }
 
-        public void GeneratePipeline() // currently unused
+        public void GeneratePipeline()
         {
             //STEP 4: Create the training pipeline 
             //var trainingPipeLine = dataProcessingPipelineResult
