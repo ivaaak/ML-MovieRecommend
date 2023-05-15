@@ -101,8 +101,7 @@ export default function App() {
         <button className="tooltipBtn">?</button>
         <span className="tooltiptext">
           <p className="fineprint">
-            Made with .NET, React, ML.NET, PostgreSQL <br />
-            Designed by Ivaylo Pavlov <br />
+            Made with .NET, React, ML.NET <br />
             Using the MovieLens dataset which comes <br /> with movie ratings,
             titles and genres. <br />
             May work poorly on mobile.
